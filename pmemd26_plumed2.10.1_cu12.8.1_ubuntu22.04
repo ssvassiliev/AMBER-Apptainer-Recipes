@@ -9,24 +9,21 @@ From: nvidia/cuda:12.8.1-devel-ubuntu22.04
     Build           source (serial + MPI + OpenMP)
 
 %help
-    Ubuntu 24.04 container with AmberTools 26 built from source.
+    Ubuntu 22.04 container with AmberTools 26 built from source.
 
-    IMPORTANT: The tarball AmberTools26.tar.bz2 must be present in the
+    IMPORTANT: Tarballs pmemd26.tar.bz2 and v2.10.1.tar.gz must be present in the
     same directory as this .def file when building:
 
         apptainer build ambertools26.sif ambertools26.def
 
-    Tools included: sander, sander.MPI, tleap, antechamber, cpptraj,
-                    pytraj, parmed, mmpbsa.py, pbsa, sqm, mdgx, and more.
+    Tools included: pmemd, pmemd.MPI, pmemd.cuda, pmemd.cud.MPI
 
     Usage:
-        apptainer exec ambertools26.sif tleap
-        apptainer exec ambertools26.sif cpptraj -i traj.in
-        apptainer exec ambertools26.sif sander -O -i mdin ...
-        apptainer exec ambertools26.sif mpirun -np 4 sander.MPI -O ...
+        apptainer exec --nv amber26.sif pmemd.cuda -O -i mdin ...
+        apptainer exec --nv amber26.sif mpirun -np 4 pmemd.cuda.MPI -O ...
 
     Interactive shell:
-        apptainer shell ambertools26.sif
+        apptainer shell amber26.sif
 
 %files
     # Copy the tarball into the container at build time.
