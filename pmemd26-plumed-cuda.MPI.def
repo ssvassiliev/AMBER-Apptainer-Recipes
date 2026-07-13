@@ -1,0 +1,153 @@
+Bootstrap: docker
+From: nvidia/cuda:12.8.1-devel-ubuntu22.04
+
+%labels
+    Author          your.email@institution.ca
+    Version         1.0
+    AmberTools      26
+    Base            Ubuntu 24.04
+    Build           source (serial + MPI + OpenMP)
+
+%help
+    Ubuntu 24.04 container with AmberTools 26 built from source.
+
+    IMPORTANT: The tarball AmberTools26.tar.bz2 must be present in the
+    same directory as this .def file when building:
+
+        apptainer build ambertools26.sif ambertools26.def
+
+    Tools included: sander, sander.MPI, tleap, antechamber, cpptraj,
+                    pytraj, parmed, mmpbsa.py, pbsa, sqm, mdgx, and more.
+
+    Usage:
+        apptainer exec ambertools26.sif tleap
+        apptainer exec ambertools26.sif cpptraj -i traj.in
+        apptainer exec ambertools26.sif sander -O -i mdin ...
+        apptainer exec ambertools26.sif mpirun -np 4 sander.MPI -O ...
+
+    Interactive shell:
+        apptainer shell ambertools26.sif
+
+%files
+    # Copy the tarball into the container at build time.
+    # Download from https://ambermd.org/GetAmber.php (registration required)
+    pmemd26.tar.bz2 /opt/pmemd26.tar.bz2
+    v2.10.1.tar.gz /opt/v2.10.1.tar.gz
+
+%environment
+    export AMBERHOME=/opt/amber26
+    export PATH=${AMBERHOME}/bin:$PATH
+    export LD_LIBRARY_PATH=${AMBERHOME}/lib:${LD_LIBRARY_PATH}
+
+%post
+    export DEBIAN_FRONTEND=noninteractive
+    NPROC=$(nproc)
+    AMBERHOME=/opt/amber26
+
+    # ---------------------------------------------------------------
+    # 1. System build dependencies
+    # ---------------------------------------------------------------
+    apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    g++ \
+    gfortran \
+    cmake \
+    make \
+    wget \
+    git \
+    flex \
+    bison \
+    patch \
+    tcsh \
+    ca-certificates \
+    zlib1g-dev \
+    libbz2-dev \
+    libboost-dev \
+    libfftw3-dev \
+    libopenmpi-dev \
+    openmpi-bin \
+    libnetcdf-dev \
+    netcdf-bin \
+    libhdf5-dev \
+    liblapack-dev \
+    libblas-dev \
+    libarpack2-dev \
+    libgsl-dev \
+    python3 \
+    python3-dev \
+    python3-pip \
+    python3-setuptools \
+    python3-pybind11 \
+    python3-numpy \
+    cython3 \
+    xorg-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+    # PLUMED
+    cd /opt
+    tar xf v2.10.1.tar.gz 
+    rm /opt/v2.10.1.tar.gz 
+    cd plumed2-2.10.1
+    ./configure
+    make -j4
+    make install
+    rm -rf /opt/plumed2-2.10.1
+
+    # PMEMD ---------------------------------------------------------
+    # 2. Extract source
+    # ---------------------------------------------------------------    
+    mkdir -p /opt/pmemd26_src
+    cd /opt
+    tar xjf /opt/pmemd26.tar.bz2 --strip-components=1 \
+        -C /opt/pmemd26_src
+    rm /opt/pmemd26.tar.bz2
+
+    # ---------------------------------------------------------------
+    # 5. MPI build (adds sander.MPI etc.)
+    # ---------------------------------------------------------------
+    mkdir -p /opt/pmemd26_src/build_mpi
+    cd /opt/pmemd26_src/build_mpi
+    export NCCL_HOME=/usr
+    ln -sf /usr/lib/x86_64-linux-gnu/libnccl.so /usr/lib/libnccl.so
+    ln -sf /usr/lib/x86_64-linux-gnu/libnccl.so.2 /usr/lib/libnccl.so.2
+    ldconfig
+    cmake .. \
+        -DCMAKE_INSTALL_PREFIX=${AMBERHOME} \
+        -DPMEMD_ONLY=TRUE \
+        -DCOMPILER=GNU \
+        -DMPI=TRUE \
+        -DOPENMP=FALSE \
+        -DCUDA=TRUE \
+        -DNCCL=FALSE \
+        -DDOWNLOAD_MINICONDA=TRUE \
+        -DUSE_CONDA_LIBS=TRUE \
+        -DPYTHON_EXECUTABLE=${AMBERHOME}/miniconda/bin/python \
+        -DBUILD_TOOLS=FALSE \
+        -DINSTALL_TESTS=FALSE \
+        -DCHECK_UPDATES=TRUE 
+
+    make -j4 install
+    make clean
+    cd /opt/pmemd26_src && rm -rf build_mpi
+
+    # ---------------------------------------------------------------
+    # 6. Cleanup
+    # ---------------------------------------------------------------
+    rm -rf /opt/pmemd26_src
+
+%runscript
+    #!/bin/bash
+    . /opt/amber26/amber.sh 2>/dev/null || true
+    exec "$@"
+
+#%test
+#    . /opt/amber26/amber.sh
+#    echo "=== AMBERHOME: ${AMBERHOME} ==="
+#    sander --version      2>&1 | head -3
+#    cpptraj --version
+#    echo "quit" | tleap
+#    echo "=== MPI build ==="
+#    sander.MPI --version  2>&1 | head -3
+#    echo "=== Test passed ==="
