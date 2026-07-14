@@ -4,9 +4,9 @@ From: nvidia/cuda:12.8.1-devel-ubuntu22.04
 %labels
     Author          your.email@institution.ca
     Version         1.0
-    AmberTools      26
-    Base            Ubuntu 24.04
-    Build           source (serial + MPI + OpenMP)
+    Pmemd           26
+    Base            Ubuntu 22.04
+    Build           source (serial + MPI + cuda
 
 %help
     Ubuntu 22.04 container with AmberTools 26 built from source.
@@ -14,7 +14,7 @@ From: nvidia/cuda:12.8.1-devel-ubuntu22.04
     IMPORTANT: Tarballs pmemd26.tar.bz2 and v2.10.1.tar.gz must be present in the
     same directory as this .def file when building:
 
-        apptainer build ambertools26.sif ambertools26.def
+        apptainer build pmemd26.sif pmemd26.def
 
     Tools included: pmemd, pmemd.MPI, pmemd.cuda, pmemd.cud.MPI
 
@@ -30,6 +30,7 @@ From: nvidia/cuda:12.8.1-devel-ubuntu22.04
     # Download from https://ambermd.org/GetAmber.php (registration required)
     pmemd26.tar.bz2 /opt/pmemd26.tar.bz2
     v2.10.1.tar.gz /opt/v2.10.1.tar.gz
+    pmemd26_FindNCCL.cmake.patch /opt/pmemd26_FindNCCL.cmake.patch
 
 %environment
     export AMBERHOME=/opt/amber26
@@ -100,6 +101,9 @@ From: nvidia/cuda:12.8.1-devel-ubuntu22.04
     tar xjf /opt/pmemd26.tar.bz2 --strip-components=1 \
         -C /opt/pmemd26_src
     rm /opt/pmemd26.tar.bz2
+    cd /opt/pmemd26_src/cmake
+    patch -p0 < /opt/pmemd26_FindNCCL.cmake.patch
+    rm /opt/pmemd26_FindNCCL.cmake.patch
 
     # ---------------------------------------------------------------
     # 5. MPI build (adds sander.MPI etc.)

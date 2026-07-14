@@ -1,0 +1,10 @@
+--- FindNCCL.cmake.orig	2026-07-13 16:34:23.000000000 -0700
++++ FindNCCL.cmake	2026-07-13 16:42:19.000000000 -0700
+@@ -18,6 +18,7 @@
+     find_package_handle_standard_args(NCCL DEFAULT_MSG NCCL_INCLUDE_DIR NCCL_LIBRARY)
+ 
+     if(NCCL_FOUND)
++	set(nccl_ENABLED TRUE)  
+         add_library(nccl UNKNOWN IMPORTED)
+         set_property(TARGET nccl PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${NCCL_INCLUDE_DIR})
+         set_property(TARGET nccl PROPERTY IMPORTED_LOCATION ${NCCL_LIBRARY})
