@@ -29,8 +29,8 @@ From: nvidia/cuda:12.8.1-devel-ubuntu22.04
     # Copy the tarball into the container at build time.
     # Download from https://ambermd.org/GetAmber.php (registration required)
     pmemd26.tar.bz2 /opt/pmemd26.tar.bz2
+    3rdPartyTools_NCCL.patch /opt/3rdPartyTools_NCCL.patch
     v2.10.1.tar.gz /opt/v2.10.1.tar.gz
-    pmemd26_FindNCCL.cmake.patch /opt/pmemd26_FindNCCL.cmake.patch
 
 %environment
     export AMBERHOME=/opt/amber26
@@ -101,9 +101,9 @@ From: nvidia/cuda:12.8.1-devel-ubuntu22.04
     tar xjf /opt/pmemd26.tar.bz2 --strip-components=1 \
         -C /opt/pmemd26_src
     rm /opt/pmemd26.tar.bz2
-    cd /opt/pmemd26_src/cmake
-    patch -p0 < /opt/pmemd26_FindNCCL.cmake.patch
-    rm /opt/pmemd26_FindNCCL.cmake.patch
+    cd /opt/pmemd26_src
+     patch -p0 < /opt/3rdPartyTools_NCCL.patch
+    rm /opt/3rdPartyTools_NCCL.patch
 
     # ---------------------------------------------------------------
     # 5. MPI build (adds sander.MPI etc.)
@@ -121,7 +121,7 @@ From: nvidia/cuda:12.8.1-devel-ubuntu22.04
         -DMPI=TRUE \
         -DOPENMP=FALSE \
         -DCUDA=TRUE \
-        -DNCCL=FALSE \
+        -DNCCL=TRUE \
         -DDOWNLOAD_MINICONDA=TRUE \
         -DUSE_CONDA_LIBS=TRUE \
         -DPYTHON_EXECUTABLE=${AMBERHOME}/miniconda/bin/python \

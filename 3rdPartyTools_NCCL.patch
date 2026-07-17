@@ -1,0 +1,11 @@
+--- cmake/3rdPartyTools.cmake.orig	2026-07-16 17:14:26.340897761 -0300
++++ cmake/3rdPartyTools.cmake	2026-07-16 17:14:47.668720403 -0300
+@@ -385,7 +385,7 @@
+ #  NVIDIA NCCL
+ #------------------------------------------------------------------------------
+ 
+-if(NEED_nccl)
++if(NCCL)
+ 	find_package(NCCL)
+ 
+ 	if(NCCL_FOUND)
