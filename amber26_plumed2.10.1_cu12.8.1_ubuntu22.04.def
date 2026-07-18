@@ -35,8 +35,9 @@ From: nvidia/cuda:12.8.1-devel-ubuntu22.04
 
 %environment
     export AMBERHOME=/opt/amber26
-    export PATH=${AMBERHOME}/bin:$PATH
+    export PATH=${AMBERHOME}/miniconda/bin:${AMBERHOME}/bin:${PATH}
     export LD_LIBRARY_PATH=${AMBERHOME}/lib:${LD_LIBRARY_PATH}
+    export PYTHONPATH=${AMBERHOME}/lib/python3.12/site-packages:${PYTHONPATH}
 
 %post
     export DEBIAN_FRONTEND=noninteractive
@@ -124,6 +125,7 @@ From: nvidia/cuda:12.8.1-devel-ubuntu22.04
         -DCHECK_UPDATES=FALSE
 
     make -j${NPROC} install
+    cp ${AMBERHOME}/amber.sh ${AMBERHOME}/amber.sh.ambertools
     make clean
     cd /opt/ambertools26_src && rm -rf build_mpi
     rm -rf /opt/ambertools26_src
@@ -165,6 +167,8 @@ From: nvidia/cuda:12.8.1-devel-ubuntu22.04
         -DCHECK_UPDATES=FALSE 
 
     make -j4 install
+    cp ${AMBERHOME}/amber.sh.ambertools ${AMBERHOME}/amber.sh
+    rm ${AMBERHOME}/amber.sh.ambertools
     make clean
     cd /opt/pmemd26_src && rm -rf build_mpi
 
