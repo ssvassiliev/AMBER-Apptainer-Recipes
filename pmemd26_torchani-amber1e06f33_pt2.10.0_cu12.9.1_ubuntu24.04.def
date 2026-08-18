@@ -1,0 +1,90 @@
+Bootstrap: docker
+From: nvidia/cuda:12.9.1-devel-ubuntu24.04
+
+%post
+    export DEBIAN_FRONTEND=noninteractive
+
+    apt-get update
+    apt-get install -y \
+        build-essential \
+        gcc-12 \
+        g++-12 \
+        gfortran-12 \
+        cmake \
+        ninja-build \
+        git \
+        wget \
+        curl \
+        vim \
+        pkg-config \
+        ca-certificates \
+        libssl-dev \
+        libffi-dev \
+        flex \
+        bison \
+        swig \
+        python3 \
+        python3-dev \
+        python3-pip \
+        python3-venv \
+        netcdf-bin \
+        libnetcdf-dev \
+        python3-netcdf4 \
+        doxygen
+
+    apt-get clean
+    rm -rf /var/lib/apt/lists/*
+
+    python3 -m venv /opt/venv
+    . /opt/venv/bin/activate
+
+    pip install --upgrade pip setuptools wheel
+
+    pip install numpy scipy cython
+
+    # PyTorch with CUDA 12.9
+    pip install torch==2.10.0 \
+        --index-url https://download.pytorch.org/whl/cu129
+
+    # TorchANI + TorchANI-Amber
+    git config --global \
+        url."https://github.com/".insteadOf "git@github.com:"
+    git config --global \
+        url."https://github.com/".insteadOf "ssh://git@github.com/"
+
+    git clone --recurse-submodules \
+        https://github.com/roitberg-group/torchani-amber.git \
+        /opt/torchani-amber
+
+    cd /opt/torchani-amber
+    patch -p0 < ../cuda_arch-sm90.patch
+
+    export CC=gcc-12
+    export CXX=g++-12
+    export FC=gfortran-12
+    export CUDAHOSTCXX=g++-12
+    export CUDACXX=/usr/local/cuda/bin/nvcc
+
+    TORCH_DIR=$(python -c \
+        "import torch; print(torch.utils.cmake_prefix_path)")
+    export CMAKE_PREFIX_PATH="$TORCH_DIR"
+
+    rm -rf build
+    ./run-cmake -T -b
+
+%environment
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+    export PATH=/opt/venv/bin:$PATH
+    export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+
+%runscript
+    python - <<'EOF'
+import torch
+print("Torch:", torch.__version__)
+print("CUDA:", torch.version.cuda)
+print("CUDA available:", torch.cuda.is_available())
+
+import torchani
+print("TorchANI:", torchani.__version__)
+EOF
