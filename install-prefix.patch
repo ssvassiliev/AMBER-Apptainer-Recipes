@@ -1,0 +1,20 @@
+--- run-cmake.orig	2026-08-18 04:56:06.000000000 -0700
++++ run-cmake	2026-08-18 05:07:33.000000000 -0700
+@@ -22,7 +22,7 @@
+ cmake_install=1
+ torch_cuda_archs=""
+ cmake_build_type="Release"
+-prefix="$HOME/.local/"
++prefix="/opt/torchani-amber"
+ while getopts "TIBPCabghxy" o; do
+     case "${o}" in
+         x)
+@@ -67,7 +67,7 @@
+             torch_cuda_archs="7.0;7.5;8.0;8.9;10.0"
+             ;;
+         b)
+-            torch_cuda_archs="8.9;10.0"
++            torch_cuda_archs="9.0"
+             ;;
+         h)
+             usage

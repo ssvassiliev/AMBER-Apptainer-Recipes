@@ -2,7 +2,7 @@ Bootstrap: docker
 From: nvidia/cuda:12.9.1-devel-ubuntu24.04
 
 %files
-    cuda_arch-sm90.patch /opt/cuda_arch-sm90.patch
+    install-prefix.patch /opt/install-prefix.patch
 
 %post
     export DEBIAN_FRONTEND=noninteractive
@@ -56,11 +56,11 @@ From: nvidia/cuda:12.9.1-devel-ubuntu24.04
         url."https://github.com/".insteadOf "ssh://git@github.com/"
 
     git clone --recurse-submodules \
-        https://github.com/roitberg-group/torchani-amber.git 
+        https://github.com/roitberg-group/torchani-amber.git /opt/torchani-amber-src
 
-    cd torchani-amber
-     patch -p0 < /opt/cuda_arch-sm90.patch
-    rm /opt/cuda_arch-sm90.patch
+    cd /opt/torchani-amber-src
+     patch -p0 < /opt/install-prefix.patch
+    rm /opt/install-prefix.patch
 
     export CC=gcc-12
     export CXX=g++-12
