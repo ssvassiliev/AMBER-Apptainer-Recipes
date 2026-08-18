@@ -1,6 +1,9 @@
 Bootstrap: docker
 From: nvidia/cuda:12.9.1-devel-ubuntu24.04
 
+%files
+    cuda_arch-sm90.patch /opt/cuda_arch-sm90.patch
+
 %post
     export DEBIAN_FRONTEND=noninteractive
 
@@ -47,17 +50,17 @@ From: nvidia/cuda:12.9.1-devel-ubuntu24.04
         --index-url https://download.pytorch.org/whl/cu129
 
     # TorchANI + TorchANI-Amber
-    git config --global \
+    git config --global --add \
         url."https://github.com/".insteadOf "git@github.com:"
-    git config --global \
+    git config --global --add \
         url."https://github.com/".insteadOf "ssh://git@github.com/"
 
     git clone --recurse-submodules \
-        https://github.com/roitberg-group/torchani-amber.git \
-        /opt/torchani-amber
+        https://github.com/roitberg-group/torchani-amber.git 
 
-    cd /opt/torchani-amber
-    patch -p0 < ../cuda_arch-sm90.patch
+    cd torchani-amber
+     patch -p0 < /opt/cuda_arch-sm90.patch
+    rm /opt/cuda_arch-sm90.patch
 
     export CC=gcc-12
     export CXX=g++-12
