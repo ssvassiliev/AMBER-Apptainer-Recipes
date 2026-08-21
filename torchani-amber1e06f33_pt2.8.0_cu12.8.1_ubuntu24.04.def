@@ -44,7 +44,8 @@ From: nvidia/cuda:12.8.1-devel-ubuntu24.04
     pip install --upgrade pip setuptools wheel
 
     pip install numpy scipy cython tqdm h5py rich huggingface_hub typer
-    pip install "typing_extensions>=4.0.0" h5py tqdm ninja typer rich ase pandas pyarrow "zarr<3" huggingface_hub
+    pip install "typing_extensions>=4.0.0" h5py tqdm ninja typer \
+    	rich ase pandas pyarrow "zarr<3" huggingface_hub
 
     # PyTorch with CUDA 12.8
     pip install torch==2.8.0 \
@@ -58,8 +59,10 @@ From: nvidia/cuda:12.8.1-devel-ubuntu24.04
 
     git clone --recurse-submodules \
         https://github.com/roitberg-group/torchani-amber.git /opt/torchani-amber-src
-
     cd /opt/torchani-amber-src
+    git checkout 1e06f3369f0b2e0fddd5e332b010c6a4638629a9
+    git submodule update --init --recursive
+
     patch -p0 < /opt/install-prefix.patch
     rm /opt/install-prefix.patch
 

@@ -1,0 +1,10 @@
+--- src/pmemd/src/CMakeLists.txt.orig	2026-08-19 07:27:51.000000000 -0700
++++ src/pmemd/src/CMakeLists.txt	2026-08-19 07:28:22.000000000 -0700
+@@ -236,6 +236,7 @@
+ endif()
+ 
+ if(torchani_ENABLED)
++    find_package(Torchani CONFIG REQUIRED)	
+     target_sources(pmemd PRIVATE ${TORCHANI_FORTRAN_INTERFACE_SRC_FILE})
+     # PRIVATE can't be specified due to plain signature being used in other calls
+     target_link_libraries(pmemd Torchani::torchani)
