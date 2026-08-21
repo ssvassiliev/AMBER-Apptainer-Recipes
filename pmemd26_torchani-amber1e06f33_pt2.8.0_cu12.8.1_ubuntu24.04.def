@@ -5,9 +5,9 @@ From: torchani-amber1e06f33_pt2.8.0_cu12.8.1_ubuntu24.04.sif
     Author          your.email@institution.ca
     Version         1.0
     Pmemd           26
-    TorchANI-Amber  main (sm90, linked to pip torch 2.10.0/cu129)
+    TorchANI-Amber  main (sm90, linked to pip torch 2.8.0/cu128)
     Base            Ubuntu 24.04
-    Build           source (serial + MPI + cuda + NCCL)
+    Build           source (serial + MPI + cuda for torchani)
 
 %help
     Ubuntu 24.04 container with AmberTools 26 (pmemd) built from source,
@@ -16,16 +16,17 @@ From: torchani-amber1e06f33_pt2.8.0_cu12.8.1_ubuntu24.04.sif
     IMPORTANT: these files must be present next to this .def when building:
         pmemd26.tar.bz2        (https://ambermd.org/GetAmber.php, registration required)
         3rdPartyTools_NCCL.patch
-        v2.10.1.tar.gz         (PLUMED source)
-        cuda_arch-sm90.patch   (TorchANI-Amber sm90 patch)
+	CudaArch.patch  
+	find_torchani.patch  
+	install-prefix.patch
 
         apptainer build pmemd26.sif pmemd26_torchani.def
 
     Tools included: pmemd, pmemd.MPI, pmemd.cuda, pmemd.cuda.MPI
 
     Usage:
-        apptainer exec --nv pmemd26.sif pmemd.cuda -O -i mdin ...
-        apptainer exec --nv pmemd26.sif mpirun -np 4 pmemd.cuda.MPI -O ...
+        apptainer exec --nv pmemd26.sif pmemd -O -i mdin ...
+        apptainer exec --nv pmemd26.sif mpirun -np 4 pmemd.MPI -O ...
 
     TorchANI-Amber full-ML usage: set iextpot=1 / &extpot / &ani in mdin as
     per https://github.com/roitberg-group/torchani-amber
